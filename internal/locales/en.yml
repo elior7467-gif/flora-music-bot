@@ -675,7 +675,7 @@ play_failed: "❌ ꜰᴀɪʟᴇᴅ ᴛᴏ ᴘʟᴀʏ\nᴇʀʀᴏʀ: {error}"
 
 play_unable: "<b> ❌ ᴜɴᴀʙʟᴇ ᴛᴏ ᴘʟᴀʏ </b>\n\n<i>ᴘʟᴇᴀsᴇ <b><b>ʀᴇsᴛᴀʀᴛ ᴛʜᴇ ᴠᴏɪᴄᴇ</b> ᴄʜᴀᴛ.</b></i>"
 
-play_downloading_song: "ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ sᴏɴɢ \"{title}\""
+play_downloading_song: "ᴘʟᴇᴀsᴇ ᴡᴀɪᴛ ʙᴀʙʏ ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ʏᴏᴜʀ ᴛʀᴀᴄᴋ..."
 
 play_download_canceled: "ᴅᴏᴡɴʟᴏᴀᴅ ᴄᴀɴᴄᴇʟᴇᴅ ʙʏ {user}."
 
@@ -961,10 +961,9 @@ rtmp_configured_success: |
   <b>🆔 <b>ᴄʜᴀᴛ ɪᴅ:</b> <code>{chat_id}</code>\n  🔗 <b>ᴜʀʟ:</b> <code>{url}</code>\n  🔑 <b>ᴋᴇʏ:</b> <code>{key}</code>\n  \n  <b>✨ ɴᴇxᴛ sᴛᴇᴘs:</b>\n  ɢᴏ ᴛᴏ ʏᴏᴜʀ ᴄʜᴀᴛ ᴀɴᴅ ᴜsᴇ:\n  <code>/sᴛʀᴇᴀᴍ &ʟᴛ;sᴏɴɢ ɴᴀᴍᴇ&ɢᴛ;</code>\n  \n  <b>🔒 sᴇᴄᴜʀɪᴛʏ ɴᴏᴛᴇ:</b>\n  ᴄʀᴇᴅᴇɴᴛɪᴀʟs ᴀʀᴇ sᴛᴏʀᴇᴅ sᴇᴄᴜʀᴇʟʏ ᴀɴᴅ ɴᴇᴠᴇʀ sʜᴏᴡɴ ɪɴ ᴛʜᴇ ɢʀᴏᴜᴘ.</b>
 
 
-searching: "sᴇᴀʀᴄʜɪɴɢ..."
+searching: "sᴇ─ᴀ─ʀᴄʜɪ─ɴ─ɢ..."
 
-searching_query: "sᴇᴀʀᴄʜɪɴɢ ꜰᴏʀ: <b>{query}</b>..."
-
+searching_query: "ᴘʟᴇᴀsᴇ ᴡᴀɪᴛ ʙᴀʙʏ sᴇᴀʀᴄʜɪɴɢ ꜰᴏʀ <b>{query}</b>..."
 
 speed_line: "⚙️ sᴘᴇᴇᴅ: <b>{speed}x</b>"
 
