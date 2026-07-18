@@ -11,10 +11,6 @@ SUPPORT_BTN: "Support"
 UPDATES_BTN: "Update"
 START_HELP_BTN: "Help and Commands"
 
-START_HELP_BTN: "❓ Help & Commands"
-
-UPDATES_BTN: "📢 Updates"
-SUPPORT_BTN: "💬 Support"
 
 HELP_ADMINS_BTN: "🛠 Admins"
 HELP_PUBLIC_BTN: "🌍 Public"
