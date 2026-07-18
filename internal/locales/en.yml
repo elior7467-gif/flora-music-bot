@@ -1,22 +1,22 @@
 name: "English"
 
 # buttons
-CONFIRM_RESUME_BTN: "Resume"
-CONFIRM_UNMUTE_BTN: "Unmute"
-CONFIRM_STOP_BTN: "Stop"
-ADD_ME_BTN: "Add me in your group"
-OWNER_BTN: "Owner"
-ABOUT_BTN: "About"
-SUPPORT_BTN: "Support"
-UPDATES_BTN: "Update"
-START_HELP_BTN: "Help and Commands"
+CONFIRM_RESUME_BTN: "ʀᴇsᴜᴍᴇ"
+CONFIRM_UNMUTE_BTN: "ᴜɴᴍᴜᴛᴇ"
+CONFIRM_STOP_BTN: "sᴛᴏᴘ"
+ADD_ME_BTN: "✛ ᴀᴅᴅ ᴍᴇ ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ ✛"
+OWNER_BTN: "ᴏᴡɴᴇʀ"
+ABOUT_BTN: "ᴀʙᴏᴜᴛ"
+SUPPORT_BTN: "sᴜᴘᴘᴏʀᴛ"
+UPDATES_BTN: "ᴜᴘᴅᴀᴛᴇ"
+START_HELP_BTN: "ʜᴇʟᴘ ᴀɴᴅ ᴄᴏᴍᴍᴀɴᴅs"
 
-HELP_ADMINS_BTN: "Admins"
-HELP_PUBLIC_BTN: "Public"
-HELP_OWNER_BTN: "Owner"
-HELP_SUDOERS_BTN: "Sudoers"
+HELP_ADMINS_BTN: "ᴀᴅᴍɪɴs"
+HELP_PUBLIC_BTN: "ᴘᴜʙʟɪᴄ"
+HELP_OWNER_BTN: "ᴏᴡɴᴇʀ"
+HELP_SUDOERS_BTN: "sᴜᴅᴏᴇʀs"
 
-BACK_BTN: "Back"
+BACK_BTN: "ʙᴀᴄᴋ"
 
 # basically this string used in /command [bool]
 invalid_bool: "<b>ɪɴᴠᴀʟɪᴅ ᴠᴀʟᴜᴇ.</b>\nᴜsᴇ 'ᴇɴᴀʙʟᴇ' ᴏʀ 'ᴅɪsᴀʙʟᴇ'."
