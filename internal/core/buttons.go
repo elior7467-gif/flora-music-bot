@@ -57,7 +57,6 @@ func GetStopConfirmMarkup(
 	if r.ChannelPlayID() != 0 {
 		prefix = "croom:"
 	}
-
 	if isPaused {
 		btn.AddRow(
 			tg.Button.Data(F(chatID, "CONFIRM_RESUME_BTN"), prefix+"resume"),
@@ -67,11 +66,9 @@ func GetStopConfirmMarkup(
 			tg.Button.Data(F(chatID, "CONFIRM_UNMUTE_BTN"), prefix+"unmute"),
 		)
 	}
-
 	btn.AddRow(
 		tg.Button.Data(F(chatID, "CONFIRM_STOP_BTN"), prefix+"stop"),
 	)
-
 	return btn.Build()
 }
 
@@ -86,14 +83,12 @@ func GetPlayMarkup(chatID int64, r *RoomState, queued bool) tg.ReplyMarkup {
 	if track != nil {
 		duration = track.Duration
 	}
-
 	progress := utils.GetProgressBar(r.Position(), duration)
 	progress = formatDuration(
 		r.Position(),
 	) + " " + progress + " " + formatDuration(
 		duration,
 	)
-
 	if !queued {
 		btn.AddRow(
 			tg.Button.Data(progress, "progress"),
@@ -105,17 +100,14 @@ func GetPlayMarkup(chatID int64, r *RoomState, queued bool) tg.ReplyMarkup {
 		tg.Button.Data("‣‣I", prefix+"skip"),
 		tg.Button.Data("▢", prefix+"stop"),
 	)
-
 	btn.AddRow(
 		tg.Button.Data("↩ 15s", "room:seekback_15"),
 		tg.Button.Data("⟳", "room:replay"),
 		tg.Button.Data("15s ↪", "room:seek_15"),
 	)
-
 	btn.AddRow(
 		tg.Button.Data(F(chatID, "CLOSE_BTN"), "close"),
 	)
-
 	return btn.Build()
 }
 
@@ -136,19 +128,29 @@ func GetStartMarkup(chatID int64) tg.ReplyMarkup {
 			),
 		).
 		AddRow(
+			tg.Button.URL(
+				F(chatID, "OWNER_BTN"),
+				"tg://user?id="+utils.IntToStr(config.OwnerID),
+			),
 			tg.Button.Data(
-				F(chatID, "START_HELP_BTN"),
-				"help_cb",
+				F(chatID, "ABOUT_BTN"),
+				"about_cb",
 			),
 		).
 		AddRow(
 			tg.Button.URL(
+				F(chatID, "SUPPORT_BTN"),
+				config.SupportChat,
+			),
+			tg.Button.URL(
 				F(chatID, "UPDATES_BTN"),
 				config.SupportChannel,
 			),
-			tg.Button.URL(
-				F(chatID, "SUPPORT_BTN"),
-				config.SupportChat,
+		).
+		AddRow(
+			tg.Button.Data(
+				F(chatID, "START_HELP_BTN"),
+				"help_cb",
 			),
 		).
 		Build()
@@ -200,7 +202,6 @@ func formatDuration(sec int) string {
 	h := sec / 3600
 	m := (sec % 3600) / 60
 	s := sec % 60
-
 	if h > 0 {
 		return fmt.Sprintf("%d:%02d:%02d", h, m, s) // HH:MM:SS
 	}
