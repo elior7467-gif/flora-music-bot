@@ -4,29 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/url"
-	"os"
-	"regexp"
-	"strconv"
 
 	"github.com/Laky-64/gologging"
 	"github.com/amarnathcjd/gogram/telegram"
 
 	"main/internal/config"
-	"main/internal/core"
 	state "main/internal/core/models"
 	"main/internal/utils"
 )
 
-var telegramDLRegex = regexp.MustCompile(
-	`https:\/\/t\.me\/([a-zA-Z0-9_]{5,})\/(\d+)`,
-)
-
 const PlatformFallenApi state.PlatformName = "FallenApi"
-
-type apiResponse struct {
-	CdnUrl string `json:"cdnurl"`
-}
 
 type FallenApiPlatform struct {
 	name state.PlatformName
@@ -57,7 +44,7 @@ func (f *FallenApiPlatform) GetTracks(
 func (f *FallenApiPlatform) CanDownload(
 	source state.PlatformName,
 ) bool {
-	if config.FallenAPIURL == "" || config.FallenAPIKey == "" {
+	if config.CustomAPIURL == "" {
 		return false
 	}
 	return source == PlatformYouTube
@@ -68,12 +55,6 @@ func (f *FallenApiPlatform) Download(
 	track *state.Track,
 	statusMsg *telegram.NewMessage,
 ) (string, error) {
-	// FallenApi is audio-only; refuse video so the registry falls through
-	// to the next downloader (yt-dlp) that can serve a proper video stream.
-	if track.Video {
-		return "", errors.New("fallen api does not support video downloads")
-	}
-
 	if f := findFile(track); f != "" {
 		gologging.Debug("FallenApi: Download -> Cached File -> " + f)
 		return f, nil
@@ -83,139 +64,39 @@ func (f *FallenApiPlatform) Download(
 	if statusMsg != nil {
 		pm = utils.GetProgress(statusMsg)
 	}
+	_ = pm // resty save-to-file doesn't report progress; kept for future use
 
-	dlURL, err := f.getDownloadURL(ctx, track.URL)
-	if err != nil {
-		return "", err
+	ext := ".mp3"
+	if track.Video {
+		ext = ".mp4"
 	}
+	path := getPath(track, ext)
 
-	path := getPath(track, ".mp3")
-
-	var downloadErr error
-	if telegramDLRegex.MatchString(dlURL) {
-		path, downloadErr = f.downloadFromTelegram(ctx, dlURL, path, pm)
-	} else {
-		downloadErr = f.downloadFromURL(ctx, dlURL, path)
-	}
-
-	if downloadErr != nil {
-		return "", downloadErr
-	}
-	if !fileExists(path) {
-		return "", errors.New("empty file returned by API")
-	}
-	return path, nil
-}
-
-func (f *FallenApiPlatform) getDownloadURL(
-	ctx context.Context,
-	mediaURL string,
-) (string, error) {
-	apiReqURL := fmt.Sprintf(
-		"%s/api/track?api_key=%s&url=%s",
-		config.FallenAPIURL,
-		config.FallenAPIKey,
-		url.QueryEscape(mediaURL),
-	)
-
-	var apiResp apiResponse
+	apiReqURL := fmt.Sprintf("%s/down?url=%s", config.CustomAPIURL, track.URL)
 
 	resp, err := rc.R().
 		SetContext(ctx).
-		SetResult(&apiResp).
+		SetResponseSaveFileName(path).
 		Get(apiReqURL)
 	if err != nil {
 		if errors.Is(err, context.Canceled) ||
 			errors.Is(err, context.DeadlineExceeded) {
 			return "", err
 		}
+		return "", fmt.Errorf("failed to download %s: %w", track.URL, err)
+	}
 
+	if resp.IsStatusFailure() {
 		return "", fmt.Errorf(
-			"failed to download %s, api request failed: %w", mediaURL,
-			sanitizeAPIError(err, config.FallenAPIKey),
-		)
-	}
-
-	if resp.IsStatusFailure() {
-		err = fmt.Errorf(
-			"failed to download %s, api request failed with status: %d body: %s",
-			mediaURL,
+			"api request failed for %s with status: %d",
+			track.URL,
 			resp.StatusCode(),
-			resp.String(),
 		)
-		gologging.Error(err.Error())
-		return "", err
 	}
 
-	if apiResp.CdnUrl == "" {
-		err = fmt.Errorf(
-			"failed to download %s, empty API response body: %s",
-			mediaURL,
-			resp.String(),
-		)
-		gologging.Error(err.Error())
-		return "", err
+	if !fileExists(path) {
+		return "", errors.New("empty file returned by API")
 	}
 
-	return apiResp.CdnUrl, nil
-}
-
-func (f *FallenApiPlatform) downloadFromURL(
-	ctx context.Context,
-	dlURL, path string,
-) error {
-	resp, err := rc.R().
-		SetContext(ctx).
-		SetResponseSaveFileName(path).
-		Get(dlURL)
-	if err != nil {
-		os.Remove(path)
-		if errors.Is(err, context.Canceled) ||
-			errors.Is(err, context.DeadlineExceeded) {
-			return err
-		}
-		return fmt.Errorf("http download failed: %w", err)
-	}
-
-	if resp.IsStatusFailure() {
-		return fmt.Errorf("download failed with status: %d", resp.StatusCode())
-	}
-
-	return nil
-}
-
-func (f *FallenApiPlatform) downloadFromTelegram(
-	ctx context.Context,
-	dlURL, path string,
-	pm *telegram.ProgressManager,
-) (string, error) {
-	matches := telegramDLRegex.FindStringSubmatch(dlURL)
-	if len(matches) < 3 {
-		return "", fmt.Errorf("invalid telegram download url: %s", dlURL)
-	}
-
-	username := matches[1]
-	messageID, err := strconv.Atoi(matches[2])
-	if err != nil {
-		return "", fmt.Errorf("invalid message ID: %v", err)
-	}
-
-	msg, err := core.Bot.GetMessageByID(username, int32(messageID))
-	if err != nil {
-		return "", fmt.Errorf("failed to fetch Telegram message: %w", err)
-	}
-
-	dOpts := &telegram.DownloadOptions{
-		FileName: path,
-		Ctx:      ctx,
-	}
-	if pm != nil {
-		dOpts.ProgressManager = pm
-	}
-	_, err = msg.Download(dOpts)
-	if err != nil {
-		os.Remove(path)
-		return "", err
-	}
 	return path, nil
 }
