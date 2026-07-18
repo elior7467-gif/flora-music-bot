@@ -32,28 +32,28 @@ const playMaxRetries = 3
 func init() {
 	helpTexts["/play"] = `<i>Toca uma música no chat de voz do YouTube, Spotify ou outras fontes.</i>
 
-<u>Uso:</u>
+Uso:
 <b>/play [query/URL]</b> — Pesquisa e toca uma música
 <b>/play [responda a áudio/vídeo]</b> — Toca a mídia respondida
 
-<b>🎵 Fontes suportadas:</b>
+🎵 Fontes suportadas:
 • YouTube (vídeos, playlists)
 • Spotify (faixas, álbuns, playlists)
 • SoundCloud
 • Links diretos de áudio/vídeo
 
-<b>⚙️ Features:</b>
+⚙️ Features:
 • Suporte a fila - adiciona no final se já tiver tocando
 • Entra no chat de voz automaticamente se não estiver
 • Checa limite de duração
 • Suporte a múltiplas faixas (playlists)
 
-<b>💡 Exemplos:</b>
+💡 Exemplos:
 <code>/play never gonna give you up</code>
 <code>/play https://youtu.be/dQw4w9WgXcQ</code>
 <code>/play https://open.spotify.com/track/...</code>
 
-<b>⚠️ Observações:</b>
+⚠️ Observações:
 • O bot precisa ter as permissões corretas no chat de voz
 • Faixas que passam do limite de duração são puladas
 • Usa <code>/queue</code> pra ver as próximas faixas
@@ -61,78 +61,78 @@ func init() {
 
 	helpTexts["/fplay"] = `<i>Força o play de uma música, pulando a fila atual.</i>
 
-<u>Uso:</u>
+Uso:
 <b>/fplay [query/URL]</b> — Força o play imediatamente
 <b>/fplay [responda a áudio/vídeo]</b> — Força o play da mídia respondida
 
-<b>🎵 Comportamento:</b>
+🎵 Comportamento:
 • Para o playback atual
 • Limpa a fila
 • Começa a tocar imediatamente
 
-<b>🔒 Restrições:</b>
+🔒 Restrições:
 • Só <b>admins do chat</b> ou <b>usuários autorizados</b> podem usar
 
-<b>💡 Exemplo:</b>
+💡 Exemplo:
 <code>/fplay musica de anúncio urgente</code>
 
-<b>⚠️ Observação:</b>
+⚠️ Observação:
 Esse comando é útil pra playback urgente mas vai bagunçar a fila atual.`
 
 	helpTexts["/vplay"] = `<i>Toca conteúdo em vídeo no chat de voz (modo vídeo).</i>
 
-<u>Uso:</u>
+Uso:
 <b>/vplay [query/URL]</b> — Toca o vídeo
 <b>/vplay [responda a vídeo]</b> — Toca o vídeo respondido
 
-<b>📹 Features:</b>
+📹 Features:
 • Suporte completo a playback de vídeo
 • Streaming de áudio + vídeo
 • Mesmo sistema de fila do áudio
 
-<b>⚠️ Observações:</b>
+⚠️ Observações:
 • Requer permissões de streaming de vídeo
 • Usa <code>/fvplay</code> pra forçar o play do vídeo`
 
 	helpTexts["/fvplay"] = `<i>Força o play de vídeo, pulando a fila.</i>
 
-<u>Uso:</u>
+Uso:
 <b>/fvplay [query/URL]</b> — Força o play do vídeo imediatamente
 
-<b>🔒 Restrições:</b>
+🔒 Restrições:
 • Comando apenas pra admins/autorizados
 
-<b>💡 Caso de uso:</b>
+💡 Caso de uso:
 Playback imediato de vídeo quando precisa mostrar algo urgente.`
 
 	helpTexts["/cplay"] = `<i>Toca no chat de voz do canal vinculado.</i>
 
-<u>Uso:</u>
+Uso:
 <b>/cplay [query]</b> — Toca no canal vinculado
 
-<b>⚙️ Setup necessário:</b>
+⚙️ Setup necessário:
 Primeiro usa <code>/channelplay --set [channel_id]</code>
 
-<b>⚠️ Observação:</b>
+⚠️ Observação:
 Todos os comandos c* funcionam igual aos comandos normais mas afetam o canal vinculado.`
 
 	helpTexts["/channelplay"] = `<i>Configura o canal vinculado pro modo channel play.</i>
 
-<u>Uso:</u>
+Uso:
 <b>/channelplay --set [channel_id]</b> — Define o canal vinculado
 
-<b>⚙️ Comportamento:</b>
+⚙️ Comportamento:
 • Vincula um canal ao grupo atual
 • Todos os comandos <code>c*</code> afetam o canal vinculado
 • O canal precisa estar acessível pro bot
 
-<b>🔒 Restrições:</b>
+🔒 Restrições:
 • Só <b>admins do chat</b> podem configurar
 
-<b>💡 Exemplos:</b>
+💡 Exemplos:
 <code>/channelplay --set -1001234567890</code>
 
-<b>⚠️ Observações:</b>
+⚠️ Observações:
 • Pega o channel ID usando encaminhar + @userinfobot
 • O bot precisa ser admin no canal vinculado
 • Usa <code>/cplay</code> depois do setup`
@@ -140,6 +140,7 @@ Todos os comandos c* funcionam igual aos comandos normais mas afetam o canal vin
 	helpTexts["/playforce"] = helpTexts["/fplay"]
 	helpTexts["/fcplay"] = helpTexts["/cfplay"]
 	helpTexts["/cvplay"] = helpTexts["/vcplay"]
+	helpTexts["/fvcplay"] = helpTexts["/fvplay"]
 }
 
 func channelPlayHandler(m *tg.NewMessage) error {
@@ -502,9 +503,6 @@ func filterAndTrimTracks(
 		return nil, 0, fmt.Errorf("all tracks skipped")
 	}
 
-	// Respect queue limit. A fila pode ter enchido entre a checagem inicial e o
-	// download (corrida de /play concorrente), deixando availableSlots negativo —
-	// sem o clamp, tracks[:availableSlots] daria panic de slice bounds.
 	availableSlots := config.QueueLimit - len(r.Queue())
 	if availableSlots < 0 {
 		availableSlots = 0
@@ -579,7 +577,6 @@ func playTracksAndRespond(
 			gologging.InfoF("Downloaded track to %s", filePath)
 		}
 
-		// 🔁 play with retry
 		if err := playTrackWithRetry(r, track, filePath, force && i == 0, replyMsg); err != nil {
 			return err
 		}
@@ -596,6 +593,7 @@ func playTracksAndRespond(
 		opt := &tg.SendOptions{
 			ParseMode:   "HTML",
 			ReplyMarkup: btn,
+			HasSpoiler:  true, // Enabled spoiler blur here for Now Playing image previews
 		}
 
 		if mainTrack.Artwork != "" && shouldShowThumb(chatID) {
@@ -637,6 +635,7 @@ func playTracksAndRespond(
 			opt := &tg.SendOptions{
 				ParseMode:   "HTML",
 				ReplyMarkup: btn,
+				HasSpoiler:  true, // Enabled spoiler blur here for Added Queue single tracks covers
 			}
 			if mainTrack.Artwork != "" && shouldShowThumb(chatID) {
 				opt.Media = utils.CleanURL(mainTrack.Artwork)
@@ -700,7 +699,6 @@ func playTrackWithRetry(
 
 		switch {
 
-		// FloodWait
 		case tg.GetFloodWait(err) > 0:
 			wait := tg.GetFloodWait(err)
 			gologging.Error(
@@ -710,7 +708,6 @@ func playTrackWithRetry(
 			time.Sleep(time.Duration(wait) * time.Second)
 			continue
 
-		// Connection timeout
 		case errors.Is(err, ubot.ErrConnectionTimeout):
 			gologging.Error(
 				"Voice connection timeout. Stopping call session...",
@@ -722,7 +719,6 @@ func playTrackWithRetry(
 			core.DeleteRoom(r.ChatID())
 			return tg.ErrEndGroup
 
-		// RTMP unsupported
 		case strings.Contains(
 			err.Error(),
 			"Streaming is not supported when using RTMP",
@@ -734,7 +730,6 @@ func playTrackWithRetry(
 			core.DeleteRoom(r.ChatID())
 			return tg.ErrEndGroup
 
-		// No active voice chat
 		case strings.Contains(err.Error(), "group call") &&
 			strings.Contains(err.Error(), "is closed"):
 			utils.EOR(
@@ -743,14 +738,12 @@ func playTrackWithRetry(
 			)
 			return tg.ErrEndGroup
 
-		// GROUPCALL_INVALID
 		case tg.MatchError(err, "GROUPCALL_INVALID"):
 			gologging.Error("GROUPCALL_INVALID err occurred. Returning...")
 			core.DeleteRoom(r.ChatID())
 			utils.EOR(replyMsg, F(replyMsg.ChannelID(), "play_unable"))
 			return tg.ErrEndGroup
 
-		// INTERDC retry
 		case tg.MatchError(err, "INTERDC_X_CALL_ERROR"):
 			gologging.Error(
 				"INTERDC_X_CALL_ERROR occurred. Retrying... (attempt " +
@@ -760,10 +753,9 @@ func playTrackWithRetry(
 			continue
 		}
 
-		// Last attempt failed
 		if attempt == playMaxRetries {
 			gologging.Error(
-				"❌ Failed to play after " + utils.IntToStr(playMaxRetries) +
+				"Failed to play after " + utils.IntToStr(playMaxRetries) +
 					" attempts. Error: " + err.Error(),
 			)
 			utils.EOR(
@@ -845,10 +837,6 @@ func getErrorMessage(chatID int64, err error) string {
 	})
 }
 
-// Both safeDownload and safeGetTracks re-raise panic because all command
-// handlers are wrapped by SafeMessageHandler, which catches panics and sends
-// the debug trace to the logger and the owner.
-
 func safeGetTracks(
 	m, replyMsg *tg.NewMessage,
 	chatID int64,
@@ -861,9 +849,6 @@ func safeGetTracks(
 		}
 	}()
 
-	// Não há ctx cancelável no escopo do play/search (o ctx de download só é
-	// criado mais tarde, por track). Usa Background; o timeout efetivo vem dos
-	// clients/yt-dlp internos.
 	tracks, err = platforms.GetTracks(context.Background(), m, video)
 	return tracks, err
 }
