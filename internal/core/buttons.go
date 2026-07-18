@@ -26,7 +26,7 @@ func AddMeMarkup(chatID int64) tg.ReplyMarkup {
 func GetCancelKeyboard(chatID int64) *tg.ReplyInlineMarkup {
 	return tg.NewKeyboard().
 		AddRow(
-			tg.Button.Data("ᴄbᴏsᴇ", "cancel"), // Fixed close text fallback
+			tg.Button.Data("ᴄbᴏsᴇ", "cancel"),
 		).
 		Build()
 }
@@ -34,7 +34,7 @@ func GetCancelKeyboard(chatID int64) *tg.ReplyInlineMarkup {
 func GetBroadcastCancelKeyboard(chatID int64) *tg.ReplyInlineMarkup {
 	return tg.NewKeyboard().
 		AddRow(
-			tg.Button.Data("ᴄbᴏsᴇ", "bcast_cancel"), // Fixed close text fallback
+			tg.Button.Data("ᴄbᴏsᴇ", "bcast_cancel"),
 		).
 		Build()
 }
@@ -101,12 +101,12 @@ func GetPlayMarkup(chatID int64, r *RoomState, queued bool) tg.ReplyMarkup {
 		tg.Button.Data("▢", prefix+"stop"),
 	)
 	btn.AddRow(
-		tg.Button.Data("↩ 15s", "room:seekback_15"),
-		tg.Button.Data("⟳", "room:replay"),
-		tg.Button.Data("15s ↪", "room:seek_15"),
+		tg.Button.Data("15s", "room:seekback_15"), // Removed emoji
+		tg.Button.Data("ʀᴇᴘʟᴀʏ", "room:replay"),  // Changed emoji to clean text
+		tg.Button.Data("15s", "room:seek_15"),     // Removed emoji
 	)
 	btn.AddRow(
-		tg.Button.Data("ᴄbᴏsᴇ", "close"), // Fixed: Swapped out F() directly for hardcoded stylized text
+		tg.Button.Data("ᴄʟᴏsᴇ", "close"),
 	)
 	return btn.Build()
 }
@@ -211,7 +211,7 @@ func formatDuration(sec int) string {
 	m := (sec % 3600) / 60
 	s := sec % 60
 	if h > 0 {
-		return fmt.Sprintf("%d:%02d:%02d", h, m, s) // HH:MM:SS
+		return fmt.Sprintf("%d:%02d:%02d", h, m, s)
 	}
-	return fmt.Sprintf("%02d:%02d", m, s) // MM:SS
+	return fmt.Sprintf("%02d:%02d", m, s)
 }
