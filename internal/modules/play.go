@@ -599,7 +599,10 @@ func playTracksAndRespond(
 		}
 
 		if mainTrack.Artwork != "" && shouldShowThumb(chatID) {
-			opt.Media = utils.CleanURL(mainTrack.Artwork)
+			opt.Media = &tg.InputMediaPhotoExternal{
+				URL:        utils.CleanURL(mainTrack.Artwork),
+				HasSpoiler: true,
+			}
 		}
 
 		nowPlayingText := F(chatID, "stream_now_playing", locales.Arg{
@@ -639,7 +642,10 @@ func playTracksAndRespond(
 				ReplyMarkup: btn,
 			}
 			if mainTrack.Artwork != "" && shouldShowThumb(chatID) {
-				opt.Media = utils.CleanURL(mainTrack.Artwork)
+				opt.Media = &tg.InputMediaPhotoExternal{
+					URL:        utils.CleanURL(mainTrack.Artwork),
+					HasSpoiler: true,
+				}
 			}
 
 			addedText := F(chatID, "play_added_to_queue_single", locales.Arg{
