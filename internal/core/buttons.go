@@ -156,6 +156,14 @@ func GetStartMarkup(chatID int64) tg.ReplyMarkup {
 		Build()
 }
 
+func GetBackToStartKeyboard(chatID int64) *tg.ReplyInlineMarkup {
+	return tg.NewKeyboard().
+		AddRow(
+			tg.Button.Data(F(chatID, "BACK_BTN"), "start"),
+		).
+		Build()
+}
+
 func GetHelpKeyboard(chatID int64) *tg.ReplyInlineMarkup {
 	return tg.NewKeyboard().
 		AddRow(
