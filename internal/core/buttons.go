@@ -26,7 +26,7 @@ func AddMeMarkup(chatID int64) tg.ReplyMarkup {
 func GetCancelKeyboard(chatID int64) *tg.ReplyInlineMarkup {
 	return tg.NewKeyboard().
 		AddRow(
-			tg.Button.Data(F(chatID, "DOWNLOAD_CANCEL_BTN"), "cancel"),
+			tg.Button.Data("ᴄbᴏsᴇ", "cancel"), // Fixed close text fallback
 		).
 		Build()
 }
@@ -34,7 +34,7 @@ func GetCancelKeyboard(chatID int64) *tg.ReplyInlineMarkup {
 func GetBroadcastCancelKeyboard(chatID int64) *tg.ReplyInlineMarkup {
 	return tg.NewKeyboard().
 		AddRow(
-			tg.Button.Data(F(chatID, "BROADCAST_CANCEL_BTN"), "bcast_cancel"),
+			tg.Button.Data("ᴄbᴏsᴇ", "bcast_cancel"), // Fixed close text fallback
 		).
 		Build()
 }
@@ -106,7 +106,7 @@ func GetPlayMarkup(chatID int64, r *RoomState, queued bool) tg.ReplyMarkup {
 		tg.Button.Data("15s ↪", "room:seek_15"),
 	)
 	btn.AddRow(
-		tg.Button.Data(F(chatID, "CLOSE_BTN"), "close"),
+		tg.Button.Data("ᴄbᴏsᴇ", "close"), // Fixed: Swapped out F() directly for hardcoded stylized text
 	)
 	return btn.Build()
 }
