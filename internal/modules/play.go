@@ -225,7 +225,7 @@ func cplayHandler(m *tg.NewMessage) error {
 		)
 		if err != nil || fullChat == nil {
 			gologging.ErrorF(
-				"Failed to get full channel pro cplay ID %d: %v",
+				"Failed to get full channel for cplay ID %d: %v",
 				cplayID, err,
 			)
 			m.Reply(
@@ -237,7 +237,7 @@ func cplayHandler(m *tg.NewMessage) error {
 
 		if err := database.LinkChannel(m.ChannelID(), cplayID); err != nil {
 			gologging.ErrorF(
-				"Failed to set cplay ID pro chat %d: %v",
+				"Failed to set cplay ID for chat %d: %v",
 				m.ChannelID(), err,
 			)
 			m.Reply(
@@ -585,15 +585,13 @@ func playTracksAndRespond(
 			ReplyMarkup: btn,
 		}
 
+		artworkHTML := ""
 		if mainTrack.Artwork != "" && shouldShowThumb(chatID) {
-			// Correctly wrapping photo object with native visual spoiler flag properties
-			opt.Media = &tg.InputMediaPhoto{
-				Media:       utils.CleanURL(mainTrack.Artwork),
-				HasSpoiler:  true,
-			}
+			// Embedded hidden HTML anchor structure blurred inside a spoiler block
+			artworkHTML = fmt.Sprintf("<tg-spoiler><a href=\"%s\">&#8203;</a></tg-spoiler>", utils.CleanURL(mainTrack.Artwork))
 		}
 
-		nowPlayingText := F(chatID, "stream_now_playing", locales.Arg{
+		nowPlayingText := artworkHTML + F(chatID, "stream_now_playing", locales.Arg{
 			"url":      mainTrack.URL,
 			"title":    title,
 			"duration": formatDuration(mainTrack.Duration),
@@ -629,15 +627,14 @@ func playTracksAndRespond(
 				ParseMode:   "HTML",
 				ReplyMarkup: btn,
 			}
+			
+			artworkHTML := ""
 			if mainTrack.Artwork != "" && shouldShowThumb(chatID) {
-				// Correctly wrapping photo object with native visual spoiler flag properties
-				opt.Media = &tg.InputMediaPhoto{
-					Media:       utils.CleanURL(mainTrack.Artwork),
-					HasSpoiler:  true,
-				}
+				// Embedded hidden HTML anchor structure blurred inside a spoiler block
+				artworkHTML = fmt.Sprintf("<tg-spoiler><a href=\"%s\">&#8203;</a></tg-spoiler>", utils.CleanURL(mainTrack.Artwork))
 			}
 
-			addedText := F(chatID, "play_added_to_queue_single", locales.Arg{
+			addedText := artworkHTML + F(chatID, "play_added_to_queue_single", locales.Arg{
 				"index":    len(r.Queue()),
 				"url":      mainTrack.URL,
 				"title":    title,
