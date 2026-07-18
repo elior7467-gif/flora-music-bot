@@ -1,6 +1,8 @@
 package modules
 
 import (
+	"time"
+
 	"github.com/Laky-64/gologging"
 	tg "github.com/amarnathcjd/gogram/telegram"
 
@@ -26,7 +28,6 @@ func startHandler(m *tg.NewMessage) error {
 
 	arg := m.Args()
 	database.AddServedUser(m.ChannelID())
-
 	if arg != "" {
 		gologging.Info(
 			"Got Start parameter: " + arg + " in ChatID: " + utils.IntToStr(
@@ -39,13 +40,11 @@ func startHandler(m *tg.NewMessage) error {
 	case "pm_help":
 		gologging.Info("User requested help via start param")
 		helpHandler(m)
-
 	default:
 		caption := F(m.ChannelID(), "start_private", locales.Arg{
 			"user": utils.MentionHTML(m.Sender),
 			"bot":  utils.MentionHTML(m.Client.Me()),
 		})
-
 		_, err := m.RespondMedia(&tg.InputMediaWebPage{
 			URL:             config.StartImage,
 			ForceLargeMedia: true,
@@ -58,7 +57,6 @@ func startHandler(m *tg.NewMessage) error {
 			gologging.Error(
 				"[start] InputMediaWebPage Reply failed: " + err.Error(),
 			)
-
 			_, err = m.RespondMedia(config.StartImage, &tg.MediaOptions{
 				Caption:     caption,
 				NoForwards:  true,
@@ -68,7 +66,6 @@ func startHandler(m *tg.NewMessage) error {
 				gologging.Error(
 					"[start] URL media reply failed: " + err.Error(),
 				)
-
 				_, err = m.Respond(caption, &tg.SendOptions{
 					NoForwards:  true,
 					ReplyMarkup: core.GetStartMarkup(m.ChannelID()),
@@ -95,26 +92,47 @@ func startHandler(m *tg.NewMessage) error {
 			)
 		}
 	}
+
 	return tg.ErrEndGroup
 }
 
 func startCB(cb *tg.CallbackQuery) error {
 	cb.Answer("")
-
 	caption := F(cb.ChannelID(), "start_private", locales.Arg{
 		"user": utils.MentionHTML(cb.Sender),
 		"bot":  utils.MentionHTML(cb.Client.Me()),
 	})
-
 	sendOpt := &tg.SendOptions{
 		ReplyMarkup: core.GetStartMarkup(cb.ChannelID()),
 		NoForwards:  true,
 	}
-
 	if config.StartImage != "" {
 		sendOpt.Media = config.StartImage
 	}
+	cb.Edit(caption, sendOpt)
+	return tg.ErrEndGroup
+}
 
+// aboutCB handles the "About" button on the start menu.
+// Register this alongside your other callback routes, e.g. in handlers.go:
+//   OnCallback("^about_cb$", aboutCB)
+func aboutCB(cb *tg.CallbackQuery) error {
+	cb.Answer("")
+
+	uptime := time.Since(config.StartTime).Round(time.Second)
+
+	caption := F(cb.ChannelID(), "about_text", locales.Arg{
+		"bot":    utils.MentionHTML(cb.Client.Me()),
+		"uptime": uptime.String(),
+	})
+
+	sendOpt := &tg.SendOptions{
+		ReplyMarkup: core.GetBackToStartKeyboard(cb.ChannelID()),
+		NoForwards:  true,
+	}
+	if config.StartImage != "" {
+		sendOpt.Media = config.StartImage
+	}
 	cb.Edit(caption, sendOpt)
 	return tg.ErrEndGroup
 }
