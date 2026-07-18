@@ -587,8 +587,8 @@ func playTracksAndRespond(
 
 		artworkHTML := ""
 		if mainTrack.Artwork != "" && shouldShowThumb(chatID) {
-			// Embedded hidden HTML anchor structure blurred inside a spoiler block
-			artworkHTML = fmt.Sprintf("<tg-spoiler><a href=\"%s\">&#8203;</a></tg-spoiler>", utils.CleanURL(mainTrack.Artwork))
+			// Styled text layout forces Telegram text parses to render the blurred graphic preview correctly
+			artworkHTML = fmt.Sprintf("<tg-spoiler><a href=\"%s\"><b>ᴛʜᴜᴍʙɴᴀɪʟ</b></a></tg-spoiler>\n\n", utils.CleanURL(mainTrack.Artwork))
 		}
 
 		nowPlayingText := artworkHTML + F(chatID, "stream_now_playing", locales.Arg{
@@ -630,8 +630,8 @@ func playTracksAndRespond(
 			
 			artworkHTML := ""
 			if mainTrack.Artwork != "" && shouldShowThumb(chatID) {
-				// Embedded hidden HTML anchor structure blurred inside a spoiler block
-				artworkHTML = fmt.Sprintf("<tg-spoiler><a href=\"%s\">&#8203;</a></tg-spoiler>", utils.CleanURL(mainTrack.Artwork))
+				// Styled text layout forces Telegram text parses to render the blurred graphic preview correctly
+				artworkHTML = fmt.Sprintf("<tg-spoiler><a href=\"%s\"><b><b>ᴛʜᴜᴍʙɴᴀɪʟ</b></b></a></tg-spoiler>\n\n", utils.CleanURL(mainTrack.Artwork))
 			}
 
 			addedText := artworkHTML + F(chatID, "play_added_to_queue_single", locales.Arg{
