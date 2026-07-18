@@ -600,8 +600,8 @@ func playTracksAndRespond(
 
 		if mainTrack.Artwork != "" && shouldShowThumb(chatID) {
 			opt.Media = &tg.InputMediaPhotoExternal{
-				URL:        utils.CleanURL(mainTrack.Artwork),
-				HasSpoiler: true,
+				URL:     utils.CleanURL(mainTrack.Artwork),
+				Spoiler: true,
 			}
 		}
 
@@ -643,8 +643,8 @@ func playTracksAndRespond(
 			}
 			if mainTrack.Artwork != "" && shouldShowThumb(chatID) {
 				opt.Media = &tg.InputMediaPhotoExternal{
-					URL:        utils.CleanURL(mainTrack.Artwork),
-					HasSpoiler: true,
+					URL:     utils.CleanURL(mainTrack.Artwork),
+					Spoiler: true,
 				}
 			}
 
