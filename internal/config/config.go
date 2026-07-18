@@ -30,6 +30,7 @@ var (
 	SpotifyClientSecret string
 	FallenAPIURL        string
 	FallenAPIKey        string
+	CustomAPIURL        string
 	BetomatoToken       string
 	BetomatoBaseURL     string
 	DefaultLang         string
@@ -102,6 +103,7 @@ func loadConfig() {
 	SpotifyClientSecret = getString("SPOTIFY_CLIENT_SECRET", "")
 	FallenAPIURL = getString("FALLEN_API_URL", "https://beta.fallenapi.fun")
 	FallenAPIKey = getString("FALLEN_API_KEY", "")
+	CustomAPIURL = getString("CUSTOM_API_URL", "https://testshit-yt.kustbotsweb.workers.dev")
 	BetomatoToken = getString("BETOMATO_TOKEN", "")
 	BetomatoBaseURL = getString("BETOMATO_BASE_URL", "https://edge.betomato.com")
 
