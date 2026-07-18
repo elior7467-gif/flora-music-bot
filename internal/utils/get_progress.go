@@ -21,7 +21,7 @@ func GetProgress(statusMsg *telegram.NewMessage) *telegram.ProgressManager {
 
 	pm.WithCallback(func(pi *telegram.ProgressInfo) {
 		text := fmt.Sprintf(
-			"<b>📥 Downloading your track...</b>\n"+
+			"<b>ᴘʟᴇᴀsᴇ ᴡᴀɪᴛ ʙᴀʙʏ ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ʏᴏᴜʀ ᴛʀᴀᴄᴋ...</b>\n"+
 				"<pre>"+
 				"Progress : %6.2f%%\n"+
 				"Speed    : %s\n"+
@@ -40,18 +40,22 @@ func GetProgress(statusMsg *telegram.NewMessage) *telegram.ProgressManager {
 }
 
 func GetProgressBar(playedSec, durationSec int) string {
-	if durationSec <= 0 || playedSec <= 0 {
-		return "◉—————————"
+	if durationSec <= 0 {
+		return "▱▱▱▱▱▱▱▱▱▱"
 	}
 
-	if playedSec >= durationSec {
-		return "—————————◉"
+	if playedSec < 0 {
+		playedSec = 0
+	} else if playedSec > durationSec {
+		playedSec = durationSec
 	}
 
-	index := (playedSec * 10) / durationSec
-	if index > 9 {
-		index = 9
+	barSize := 10
+	index := (playedSec * barSize) / durationSec
+
+	if index > barSize {
+		index = barSize
 	}
 
-	return strings.Repeat("—", index) + "◉" + strings.Repeat("—", 9-index)
+	return strings.Repeat("▰", index) + strings.Repeat("▱", barSize-index)
 }
