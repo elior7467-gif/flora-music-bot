@@ -225,7 +225,7 @@ func cplayHandler(m *tg.NewMessage) error {
 		)
 		if err != nil || fullChat == nil {
 			gologging.ErrorF(
-				"Failed to get full channel for cplay ID %d: %v",
+				"Failed to get full channel pro cplay ID %d: %v",
 				cplayID, err,
 			)
 			m.Reply(
@@ -237,7 +237,7 @@ func cplayHandler(m *tg.NewMessage) error {
 
 		if err := database.LinkChannel(m.ChannelID(), cplayID); err != nil {
 			gologging.ErrorF(
-				"Failed to set cplay ID for chat %d: %v",
+				"Failed to set cplay ID pro chat %d: %v",
 				m.ChannelID(), err,
 			)
 			m.Reply(
@@ -337,7 +337,6 @@ func prepareRoomAndSearchMessage(
 		return nil, nil, fmt.Errorf("no song query")
 	}
 
-	// Searching messages
 	searchStr := ""
 	if query != "" {
 		searchStr = F(chatID, "searching_query", locales.Arg{
@@ -449,10 +448,7 @@ func filterAndTrimTracks(
 		filteredTracks = append(filteredTracks, track)
 	}
 
-	// Some tracks were skipped due to duration limit
 	if len(skippedTracks) > 0 {
-
-		// CASE 1: Only one track and it was skipped
 		if len(tracks) == 1 && len(filteredTracks) == 0 {
 			utils.EOR(
 				replyMsg,
@@ -464,9 +460,7 @@ func filterAndTrimTracks(
 			return nil, 0, fmt.Errorf("single long track skipped")
 		}
 
-		// CASE 2: Multiple tracks skipped
 		var b strings.Builder
-
 		b.WriteString(
 			F(chatID, "play_multiple_tracks_too_long_header", locales.Arg{
 				"count":      len(skippedTracks),
@@ -494,10 +488,8 @@ func filterAndTrimTracks(
 		time.Sleep(1 * time.Second)
 	}
 
-	// Keep only accepted tracks
 	tracks = filteredTracks
 
-	// CASE: everything was skipped
 	if len(tracks) == 0 {
 		utils.EOR(replyMsg, F(chatID, "play_all_tracks_skipped"))
 		return nil, 0, fmt.Errorf("all tracks skipped")
@@ -534,7 +526,6 @@ func playTracksAndRespond(
 		title := utils.EscapeHTML(utils.ShortTitle(track.Title, 25))
 		var filePath string
 
-		// Download first track if needed
 		if i == 0 && (!isActive || force) {
 			var opt *tg.SendOptions
 			if track.Duration > 420 {
@@ -585,7 +576,6 @@ func playTracksAndRespond(
 
 	mainTrack := tracks[0]
 
-	// ---------- Now Playing / Added to queue ----------
 	if !isActive || (force && len(tracks) > 0) {
 		title := utils.EscapeHTML(utils.ShortTitle(mainTrack.Title, 25))
 		btn := core.GetPlayMarkup(chatID, r, false)
@@ -593,11 +583,14 @@ func playTracksAndRespond(
 		opt := &tg.SendOptions{
 			ParseMode:   "HTML",
 			ReplyMarkup: btn,
-			HasSpoiler:  true, // Enabled spoiler blur here for Now Playing image previews
 		}
 
 		if mainTrack.Artwork != "" && shouldShowThumb(chatID) {
-			opt.Media = utils.CleanURL(mainTrack.Artwork)
+			// Correctly wrapping photo object with native visual spoiler flag properties
+			opt.Media = &tg.InputMediaPhoto{
+				Media:       utils.CleanURL(mainTrack.Artwork),
+				HasSpoiler:  true,
+			}
 		}
 
 		nowPlayingText := F(chatID, "stream_now_playing", locales.Arg{
@@ -635,10 +628,13 @@ func playTracksAndRespond(
 			opt := &tg.SendOptions{
 				ParseMode:   "HTML",
 				ReplyMarkup: btn,
-				HasSpoiler:  true, // Enabled spoiler blur here for Added Queue single tracks covers
 			}
 			if mainTrack.Artwork != "" && shouldShowThumb(chatID) {
-				opt.Media = utils.CleanURL(mainTrack.Artwork)
+				// Correctly wrapping photo object with native visual spoiler flag properties
+				opt.Media = &tg.InputMediaPhoto{
+					Media:       utils.CleanURL(mainTrack.Artwork),
+					HasSpoiler:  true,
+				}
 			}
 
 			addedText := F(chatID, "play_added_to_queue_single", locales.Arg{
