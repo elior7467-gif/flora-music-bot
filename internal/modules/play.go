@@ -111,7 +111,7 @@ Playback imediato de vídeo quando precisa mostrar algo urgente.`
 <b>/cplay [query]</b> — Toca no canal vinculado
 
 <b>⚙️ Setup necessário:</b>
- Primeiro usa <code>/channelplay --set [channel_id]</code>
+Primeiro usa <code>/channelplay --set [channel_id]</code>
 
 <b>⚠️ Observação:</b>
 Todos os comandos c* funcionam igual aos comandos normais mas afetam o canal vinculado.`
@@ -329,17 +329,19 @@ func prepareRoomAndSearchMessage(
 		query = strings.TrimSpace(parts[1])
 	}
 
-	// Direct fix for MESSAGE_IDS_EMPTY: Explicitly validate the reply message payload map signature
-	if query == "" && (m.ReplyTo == nil || m.ReplyTo.ReplyToMsgId == 0) {
+	// Native Gogram reply tracking
+	isReply := m.ReplyToMessageId != 0
+
+	if query == "" && !isReply {
 		m.Reply(F(chatID, "no_song_query", locales.Arg{
 			"cmd": getCommand(m),
 		}))
 		return nil, nil, fmt.Errorf("no song query")
 	}
 
-	// Check if we can pull target details securely beforehand
-	if query == "" && (m.ReplyTo != nil && m.ReplyTo.ReplyToMsgId != 0) {
-		_, err := m.GetReplyTo()
+	// Verify target reply existence securely to eliminate empty ID lookup payload panics
+	if query == "" && isReply {
+		_, err := m.GetReplyToMessage()
 		if err != nil {
 			gologging.ErrorF("Failed verifying internal track parent reference target: %v", err)
 			m.Reply("❌ Cannot retrieve the target replied message context details.")
@@ -357,7 +359,7 @@ func prepareRoomAndSearchMessage(
 		searchStr = F(chatID, "searching")
 	}
 
-	// Using explicit SendOptions to guarantee clean context routing without empty arrays
+	// Use Respond with SendOptions to prevent channel routing glitches
 	replyMsg, err := m.Respond(searchStr, &tg.SendOptions{ParseMode: "HTML"})
 	if err != nil {
 		gologging.ErrorF("Failed to send searching message: %v", err)
