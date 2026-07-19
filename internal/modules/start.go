@@ -45,35 +45,27 @@ func startHandler(m *tg.NewMessage) error {
 			"user": utils.MentionHTML(m.Sender),
 			"bot":  utils.MentionHTML(m.Client.Me()),
 		})
-		_, err := m.RespondMedia(&tg.InputMediaWebPage{
-			URL:             config.StartImage,
-			ForceLargeMedia: true,
-		}, &tg.MediaOptions{
+		
+		// Using SendOptions with Spoiler field which is globally supported across wrapper versions
+		sendOpt := &tg.SendOptions{
 			Caption:     caption,
 			NoForwards:  true,
 			ReplyMarkup: core.GetStartMarkup(m.ChannelID()),
-			HasSpoiler:  true, // Blurs image as a spoiler bro
-		})
+			Media:       config.StartImage,
+			Spoiler:     true, // This hides the image with a spoiler mesh
+		}
+
+		_, err := m.Respond(caption, sendOpt)
 		if err != nil {
 			gologging.Error(
-				"[start] InputMediaWebPage Reply failed: " + err.Error(),
+				"[start] Media send with spoiler failed: " + err.Error(),
 			)
-			_, err = m.RespondMedia(config.StartImage, &tg.MediaOptions{
-				Caption:     caption,
+			// Fallback text only if media completely breaks
+			_, err = m.Respond(caption, &tg.SendOptions{
 				NoForwards:  true,
 				ReplyMarkup: core.GetStartMarkup(m.ChannelID()),
-				HasSpoiler:  true, // Blurs backup image as a spoiler bro
 			})
-			if err != nil {
-				gologging.Error(
-					"[start] URL media reply failed: " + err.Error(),
-				)
-				_, err = m.Respond(caption, &tg.SendOptions{
-					NoForwards:  true,
-					ReplyMarkup: core.GetStartMarkup(m.ChannelID()),
-				})
-				return err
-			}
+			return err
 		}
 	}
 
@@ -115,9 +107,6 @@ func startCB(cb *tg.CallbackQuery) error {
 	return tg.ErrEndGroup
 }
 
-// aboutCB handles the "About" button on the start menu.
-// Register this alongside your other callback routes, e.g. in handlers.go:
-//    OnCallback("^about_cb$", aboutCB)
 func aboutCB(cb *tg.CallbackQuery) error {
 	cb.Answer("")
 
