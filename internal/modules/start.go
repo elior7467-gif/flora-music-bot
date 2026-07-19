@@ -1,10 +1,11 @@
 package modules
 
 import (
+	"math/rand"
 	"time"
 
 	"github.com/Laky-64/gologging"
-	tg "github.com/amarnathcjd/gogram/telegram"
+	tg "github.com/amarnathcjm/gogram/telegram"
 
 	"main/internal/config"
 	"main/internal/core"
@@ -41,26 +42,81 @@ func startHandler(m *tg.NewMessage) error {
 		gologging.Info("User requested help via start param")
 		helpHandler(m)
 	default:
+		r := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+		// 1. Trigger a Random Auto-Reaction (Matches Pyrogram implementation)
+		reactions := []string{"❤️", "🔥", "⚡", "😍", "🎉", "🥰", "✨", "🦋", "🌸", "💋", "💖"}
+		randomReaction := reactions[r.Intn(len(reactions))]
+		_ = m.React(randomReaction)
+
+		// 2. "hi honnnney type write" Frame-by-Frame Typing Animation
+		animText := []string{
+			"❁",
+			"❁ ℎ",
+			"❁ ℎ𝑖",
+			"❁ ℎ𝑖 ℎ",
+			"❁ ℎ𝑖 ℎ𝑜",
+			"❁ ℎ𝑖 ℎ5",
+			"❁ ℎ𝑖 ℎ𝑜𝑛",
+			"❁ ℎ𝑖 ℎ
+			"❁ ℎ𝑖 ℎ𝑜𝑛𝑒",
+			"❁ ℎ𝑖 ℎ𝑜𝑛𝑒𝑒",
+			"❁ ℎ𝑖 ℎ
+			"❁ ℎ𝑖 ℎ
+			"❁ ℎ𝑖 ℎ𝑜
+			"❁ ℎ𝑖 ℎ𝑜
+			"❁ ℎ𝑖 ℎ𝑜𝑛𝑒𝑒𝑒",
+			"❁ ℎ𝑖 ℎ𝑜𝑛𝑒𝑒𝑒𝑦",
+			"❁ ℎ𝑖 ℎ𝑜𝑛𝑒eeʏ ❁",
+			"✨ ℎ𝑖 ℎ𝑜𝑛𝑒eeʏ ✨",
+			"🌸 ℎ𝑖 ℎ
+			"🌸 ℎ𝑖 ℎ𝑜𝑛𝑒eeʏ 🌸",
+		}
+
+		// Send initial typing frame
+		animMsg, err := m.Respond(animText[0], &tg.SendOptions{})
+		if err == nil {
+			// Loop frames with slight delay
+			for _, text := range animText[1:] {
+				time.Sleep(40 * time.Millisecond)
+				_, _ = animMsg.Edit(text, &tg.SendOptions{})
+			}
+			// Clean up animation frame
+			time.Sleep(100 * time.Millisecond)
+			_ = animMsg.Delete()
+		}
+
+		// 3. Select and Send Random Sticker
+		stickers := []string{
+			"CAACAgUAAxkBAAERSZ5qFrUovFMtksurKhQTv45yVUrOfQAC8x0AAui3IVY8DSpAuqVR7jsE",
+			"CAACAgIAAxkBAAERSaBqFrWCmOjc6nrqWKMTiZE0FpFXjwACup8AArLXgUgE5umHBy9ewzsE",
+			"CAACAgIAAxkBAAERSaJqFrXAyyTxU1YAAS36RxVxwHO921AAAgUuAAIQlDlKtx2PXUs8Y307BA",
+			"CAACAgUAAxkBAAERSaRqFrXlFmoKB9fr-yrgb-4XzqmDtwACfwgAAnVOGFavmNzCq-QSnjsE",
+			"CAACAgIAAxkBAAERSaZqFrYzK553Zc_hl86IYI5UiBhPvgAC-3EAAhdc2UoveorfYh-18zsE",
+		}
+		randomSticker := stickers[r.Intn(len(stickers))]
+		_, _ = m.Respond(randomSticker, &tg.SendOptions{})
+		time.Sleep(300 * time.Millisecond)
+
+		// 4. Send Main Menu Layout with Spoiler Image
 		caption := F(m.ChannelID(), "start_private", locales.Arg{
 			"user": utils.MentionHTML(m.Sender),
 			"bot":  utils.MentionHTML(m.Client.Me()),
 		})
 		
-		// Using SendOptions with Spoiler field which is globally supported across wrapper versions
 		sendOpt := &tg.SendOptions{
 			Caption:     caption,
 			NoForwards:  true,
 			ReplyMarkup: core.GetStartMarkup(m.ChannelID()),
 			Media:       config.StartImage,
-			Spoiler:     true, // This hides the image with a spoiler mesh
+			Spoiler:     true, // Native layout blurring mapping
 		}
 
-		_, err := m.Respond(caption, sendOpt)
+		_, err = m.Respond(caption, sendOpt)
 		if err != nil {
 			gologging.Error(
 				"[start] Media send with spoiler failed: " + err.Error(),
 			)
-			// Fallback text only if media completely breaks
 			_, err = m.Respond(caption, &tg.SendOptions{
 				NoForwards:  true,
 				ReplyMarkup: core.GetStartMarkup(m.ChannelID()),
