@@ -132,10 +132,6 @@ func GetStartMarkup(chatID int64) tg.ReplyMarkup {
 				F(chatID, "OWNER_BTN"),
 				"tg://user?id="+utils.IntToStr(config.OwnerID),
 			),
-			tg.Button.Data(
-				F(chatID, "ABOUT_BTN"),
-				"about_cb",
-			),
 		).
 		AddRow(
 			tg.Button.URL(
