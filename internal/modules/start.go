@@ -51,19 +51,17 @@ func startHandler(m *tg.NewMessage) error {
 
 		// 2. "hi honnnney type write" Frame-by-Frame Typing Animation
 		animText := []string{
-			 "❁",
-            "❁ ℎ",
-            "❁ ℎ𝑖",
-            "❁ ℎ𝑖 ℎ",
-            "❁ ℎ𝑖 ℎ𝑜",
-            "❁ ℎ𝑖 ℎ𝑜𝑛",
-            "❁ ℎ𝑖 ℎ𝑜𝑛𝑒",
-            "❁ ℎ𝑖 ℎ𝑜𝑛𝑒𝑒",
-            "❁ ℎ𝑖 ℎ𝑜𝑛𝑒𝑒𝑒",
-            "❁ ℎ𝑖 ℎ𝑜𝑛𝑒𝑒𝑒𝑦",
-            "❁ ℎ𝑖 ℎ𝑜𝑛𝑒𝑒𝑒𝑦 ❁",
-            "✨ ℎ𝑖 ℎ𝑜𝑛𝑒𝑒𝑒𝑦 ✨",
-            "🌸 ℎ𝑖 ℎ𝑜𝑛𝑒𝑒𝑒𝑦 🌸",
+			"❁",
+			"❁ ℎ",
+			"❁ ℎ𝑖",
+			"❁ ℎ𝑖 ℎ",
+			"❁ ℎ𝑖 ℎ||𝑜𝑛",
+			"❁ ℎ𝑖 ℎ||𝑜𝑛𝑒",
+			"❁ ℎ𝑖 ℎ||𝑜𝑛𝑒ee",
+			"❁ ℎ𝑖 ℎ||𝑜𝑛𝑒eeʏ",
+			"❁ ℎ𝑖 ℎ||𝑜𝑛𝑒eeʏ ❁",
+			"✨ ℎ𝑖 ℎ||i ℎ||𝑜𝑛𝑒eeʏ ✨",
+			"🌸 ℎ𝑖 ℎ||𝑜𝑛𝑒eeʏ 🌸",
 		}
 
 		// Send initial typing frame
@@ -79,7 +77,7 @@ func startHandler(m *tg.NewMessage) error {
 			_, _ = animMsg.Delete()
 		}
 
-		// 3. Select and Send Random Sticker via SendMedia
+		// 3. Select and Send Random Sticker via the Client
 		stickers := []string{
 			"CAACAgUAAxkBAAERSZ5qFrUovFMtksurKhQTv45yVUrOfQAC8x0AAui3IVY8DSpAuqVR7jsE",
 			"CAACAgIAAxkBAAERSaBqFrWCmOjc6nrqWKMTiZE0FpFXjwACup8AArLXgUgE5umHBy9ewzsE",
@@ -88,10 +86,8 @@ func startHandler(m *tg.NewMessage) error {
 			"CAACAgIAAxkBAAERSaZqFrYzK553Zc_hl86IYI5UiBhPvgAC-3EAAhdc2UoveorfYh-18zsE",
 		}
 		randomSticker := stickers[r.Intn(len(stickers))]
-
-		// gogram's Client has no SendSticker method — stickers (like any media)
-		// go through SendMedia using the file's ID/unique-ID string.
-		_, _ = m.Client.SendMedia(m.ChannelID(), randomSticker, &tg.MediaOptions{})
+		
+		_, _ = m.Client.SendSticker(m.ChannelID(), randomSticker)
 		time.Sleep(300 * time.Millisecond)
 
 		// 4. Send Main Menu Layout with Spoiler Image
@@ -99,13 +95,13 @@ func startHandler(m *tg.NewMessage) error {
 			"user": utils.MentionHTML(m.Sender),
 			"bot":  utils.MentionHTML(m.Client.Me()),
 		})
-
+		
 		sendOpt := &tg.SendOptions{
 			Caption:     caption,
 			NoForwards:  true,
 			ReplyMarkup: core.GetStartMarkup(m.ChannelID()),
 			Media:       config.StartImage,
-			Spoiler:     true,
+			Spoiler:     true, 
 		}
 
 		_, err = m.Respond(caption, sendOpt)
@@ -150,27 +146,6 @@ func startCB(cb *tg.CallbackQuery) error {
 	})
 	sendOpt := &tg.SendOptions{
 		ReplyMarkup: core.GetStartMarkup(cb.ChannelID()),
-		NoForwards:  true,
-	}
-	if config.StartImage != "" {
-		sendOpt.Media = config.StartImage
-	}
-	cb.Edit(caption, sendOpt)
-	return tg.ErrEndGroup
-}
-
-func aboutCB(cb *tg.CallbackQuery) error {
-	cb.Answer("")
-
-	uptime := time.Since(config.StartTime).Round(time.Second)
-
-	caption := F(cb.ChannelID(), "about_text", locales.Arg{
-		"bot":    utils.MentionHTML(cb.Client.Me()),
-		"uptime": uptime.String(),
-	})
-
-	sendOpt := &tg.SendOptions{
-		ReplyMarkup: core.GetBackToStartKeyboard(cb.ChannelID()),
 		NoForwards:  true,
 	}
 	if config.StartImage != "" {
