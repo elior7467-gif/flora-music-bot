@@ -77,7 +77,7 @@ func startHandler(m *tg.NewMessage) error {
 			_, _ = animMsg.Delete()
 		}
 
-		// 3. Select and Send Random Sticker (Fixed to use ReplySticker)
+		// 3. Select and Send Random Sticker via the Client (Fixed)
 		stickers := []string{
 			"CAACAgUAAxkBAAERSZ5qFrUovFMtksurKhQTv45yVUrOfQAC8x0AAui3IVY8DSpAuqVR7jsE",
 			"CAACAgIAAxkBAAERSaBqFrWCmOjc6nrqWKMTiZE0FpFXjwACup8AArLXgUgE5umHBy9ewzsE",
@@ -87,8 +87,8 @@ func startHandler(m *tg.NewMessage) error {
 		}
 		randomSticker := stickers[r.Intn(len(stickers))]
 		
-		// Use ReplySticker or SendSticker so Telegram renders the graphic instead of text
-		_, _ = m.ReplySticker(randomSticker)
+		// Use SendSticker directly from the client instance
+		_, _ = m.Client.SendSticker(m.ChannelID(), randomSticker)
 		time.Sleep(300 * time.Millisecond)
 
 		// 4. Send Main Menu Layout with Spoiler Image
