@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/Laky-64/gologging"
-	tg "github.com/AmarnathCJD/gogram/telegram"
+	tg "github.com/amarnathcjd/gogram/telegram"
 
 	"main/internal/config"
 	"main/internal/core"
@@ -55,15 +55,13 @@ func startHandler(m *tg.NewMessage) error {
 			"❁ ℎ",
 			"❁ ℎ𝑖",
 			"❁ ℎ𝑖 ℎ",
-			"❁ ℎ𝑖 ℎ𝑜",
-			"❁ ℎ𝑖 ℎ𝑜𝑛",
-			"❁ ℎ𝑖 ℎ_i ℎ𝑜𝑛𝑒",
-			"❁ ℎ𝑖 ℎ𝑜𝑛𝑒e",
+			"❁ ℎ𝑖 ℎ||𝑜𝑛",
+			"❁ ℎ𝑖 ℎ𝑜𝑛𝑒",
 			"❁ ℎ𝑖 ℎ𝑜𝑛𝑒ee",
-			"❁ ℎ𝑖 ℎ𝑜𝑛𝑒eeʏ",
+			"❁ ℎ𝑖 ℎ||𝑜𝑛𝑒eeʏ",
 			"❁ ℎ𝑖 ℎ𝑜𝑛𝑒eeʏ ❁",
-			"✨ ℎ𝑖 ℎ𝑜𝑛𝑒eeʏ ✨",
-			"🌸 ℎ𝑖 ℎ𝑜𝑛𝑒eeʏ 🌸",
+			"✨ ℎ𝑖 ℎ||i ℎ||𝑜𝑛𝑒eeʏ ✨",
+			"🌸 ℎ𝑖 ℎ||𝑜𝑛𝑒eeʏ 🌸",
 		}
 
 		// Send initial typing frame
@@ -102,7 +100,7 @@ func startHandler(m *tg.NewMessage) error {
 			NoForwards:  true,
 			ReplyMarkup: core.GetStartMarkup(m.ChannelID()),
 			Media:       config.StartImage,
-			Spoiler:     true, // Blurs the media as a spoiler
+			Spoiler:     true, // Blurs the media layout until tapped
 		}
 
 		_, err = m.Respond(caption, sendOpt)
