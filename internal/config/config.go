@@ -111,19 +111,19 @@ func loadConfig() {
 	DurationLimit = getInt("DURATION_LIMIT", 4200) // In seconds
 	LeaveOnDemoted = getBool("LEAVE_ON_DEMOTED", false)
 	QueueLimit = getInt("QUEUE_LIMIT", 7)
-	SupportChat = getString("SUPPORT_CHAT", "https://t.me/WinxCallGroup")
-	SupportChannel = getString("SUPPORT_CHANNEL", "https://t.me/WinxCallChannel")
+	SupportChat = getString("SUPPORT_CHAT", "https://t.me/Steve_Bot_X")
+	SupportChannel = getString("SUPPORT_CHANNEL", "https://t.me/SteveBotsX")
 	CookiesLink = getString("COOKIES_LINK", "")
 	SetCmds = getBool("SET_CMDS", false)
 	MaxAuthUsers = getInt("MAX_AUTH_USERS", 25)
 
 	StartImage = getString(
 		"START_IMG_URL",
-		"https://raw.githubusercontent.com/gabrielmaialva33/flora-music-bot/refs/heads/main/.github/assets/start.png",
+		"https://files.catbox.moe/vvna9c.jpg",
 	)
 	PingImage = getString(
 		"PING_IMG_URL",
-		"https://raw.githubusercontent.com/gabrielmaialva33/flora-music-bot/refs/heads/main/.github/assets/ping.png",
+		"https://file.garden/adm7hfVns05znNmw/_.png",
 	)
 	Port = getString("PORT", "8000")
 }
