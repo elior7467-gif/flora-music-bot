@@ -56,10 +56,11 @@ func startHandler(m *tg.NewMessage) error {
 			"❁ ℎ𝑖",
 			"❁ ℎ𝑖 ℎ",
 			"❁ ℎ𝑖 ℎ||𝑜𝑛",
-			"❁ ℎ𝑖 ℎ𝑜𝑛𝑒",
-			"❁ ℎ𝑖 ℎ𝑜𝑛𝑒ee",
-			"❁ ℎ𝑖 ℎ||𝑜𝑛𝑒eeʏ",
-			"❁ ℎ𝑖 ℎ𝑜𝑛𝑒eeʏ ❁",
+			"❁ ℎ𝑖 ℎ||𝑜𝑛𝑒",
+			"❁ ℎ𝑖 ℎ||𝑜𝑛𝑒𝑒",
+			"❁ ℎ𝑖 ℎ||𝑜𝑛𝑒𝑒𝑒",
+			"❁ ℎ𝑖 ℎ||𝑜𝑛𝑒𝑒𝑒𝑦",
+			"❁ ℎ𝑖 ℎ||𝑜𝑛𝑒eeʏ ❁",
 			"✨ ℎ𝑖 ℎ||i ℎ||𝑜𝑛𝑒eeʏ ✨",
 			"🌸 ℎ𝑖 ℎ||𝑜𝑛𝑒eeʏ 🌸",
 		}
@@ -72,9 +73,9 @@ func startHandler(m *tg.NewMessage) error {
 				time.Sleep(40 * time.Millisecond)
 				_, _ = animMsg.Edit(text, &tg.SendOptions{})
 			}
-			// Clean up animation frame
+			// Clean up animation frame - Fixed double assignment error here
 			time.Sleep(100 * time.Millisecond)
-			_ = animMsg.Delete()
+			_, _ = animMsg.Delete()
 		}
 
 		// 3. Select and Send Random Sticker
