@@ -57,9 +57,8 @@ func startHandler(m *tg.NewMessage) error {
 			"❁ ℎ𝑖 ℎ",
 			"❁ ℎ𝑖 ℎ||𝑜𝑛",
 			"❁ ℎ𝑖 ℎ||𝑜𝑛𝑒",
-			"❁ ℎ𝑖 ℎ||𝑜𝑛𝑒𝑒",
-			"❁ ℎ𝑖 ℎ||𝑜𝑛𝑒𝑒𝑒",
-			"❁ ℎ𝑖 ℎ||𝑜𝑛𝑒𝑒𝑒𝑦",
+			"❁ ℎ𝑖 ℎ||𝑜𝑛𝑒ee",
+			"❁ ℎ𝑖 ℎ||𝑜𝑛𝑒eeʏ",
 			"❁ ℎ𝑖 ℎ||𝑜𝑛𝑒eeʏ ❁",
 			"✨ ℎ𝑖 ℎ||i ℎ||𝑜𝑛𝑒eeʏ ✨",
 			"🌸 ℎ𝑖 ℎ||𝑜𝑛𝑒eeʏ 🌸",
@@ -73,12 +72,12 @@ func startHandler(m *tg.NewMessage) error {
 				time.Sleep(40 * time.Millisecond)
 				_, _ = animMsg.Edit(text, &tg.SendOptions{})
 			}
-			// Clean up animation frame - Fixed double assignment error here
+			// Clean up animation frame
 			time.Sleep(100 * time.Millisecond)
 			_, _ = animMsg.Delete()
 		}
 
-		// 3. Select and Send Random Sticker
+		// 3. Select and Send Random Sticker (Fixed to use ReplySticker)
 		stickers := []string{
 			"CAACAgUAAxkBAAERSZ5qFrUovFMtksurKhQTv45yVUrOfQAC8x0AAui3IVY8DSpAuqVR7jsE",
 			"CAACAgIAAxkBAAERSaBqFrWCmOjc6nrqWKMTiZE0FpFXjwACup8AArLXgUgE5umHBy9ewzsE",
@@ -87,7 +86,9 @@ func startHandler(m *tg.NewMessage) error {
 			"CAACAgIAAxkBAAERSaZqFrYzK553Zc_hl86IYI5UiBhPvgAC-3EAAhdc2UoveorfYh-18zsE",
 		}
 		randomSticker := stickers[r.Intn(len(stickers))]
-		_, _ = m.Respond(randomSticker, &tg.SendOptions{})
+		
+		// Use ReplySticker or SendSticker so Telegram renders the graphic instead of text
+		_, _ = m.ReplySticker(randomSticker)
 		time.Sleep(300 * time.Millisecond)
 
 		// 4. Send Main Menu Layout with Spoiler Image
@@ -101,7 +102,7 @@ func startHandler(m *tg.NewMessage) error {
 			NoForwards:  true,
 			ReplyMarkup: core.GetStartMarkup(m.ChannelID()),
 			Media:       config.StartImage,
-			Spoiler:     true, // Blurs the media layout until tapped
+			Spoiler:     true, 
 		}
 
 		_, err = m.Respond(caption, sendOpt)
