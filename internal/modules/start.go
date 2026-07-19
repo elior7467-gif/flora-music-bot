@@ -52,6 +52,7 @@ func startHandler(m *tg.NewMessage) error {
 			Caption:     caption,
 			NoForwards:  true,
 			ReplyMarkup: core.GetStartMarkup(m.ChannelID()),
+			HasSpoiler:  true, // Blurs image as a spoiler bro
 		})
 		if err != nil {
 			gologging.Error(
@@ -61,6 +62,7 @@ func startHandler(m *tg.NewMessage) error {
 				Caption:     caption,
 				NoForwards:  true,
 				ReplyMarkup: core.GetStartMarkup(m.ChannelID()),
+				HasSpoiler:  true, // Blurs backup image as a spoiler bro
 			})
 			if err != nil {
 				gologging.Error(
@@ -115,7 +117,7 @@ func startCB(cb *tg.CallbackQuery) error {
 
 // aboutCB handles the "About" button on the start menu.
 // Register this alongside your other callback routes, e.g. in handlers.go:
-//   OnCallback("^about_cb$", aboutCB)
+//    OnCallback("^about_cb$", aboutCB)
 func aboutCB(cb *tg.CallbackQuery) error {
 	cb.Answer("")
 
