@@ -77,7 +77,7 @@ func startHandler(m *tg.NewMessage) error {
 			_, _ = animMsg.Delete()
 		}
 
-		// 3. Select and Send Random Sticker via the Client
+		// 3. Select and Send Random Sticker using SendMedia (Fixed compilation error)
 		stickers := []string{
 			"CAACAgUAAxkBAAERSZ5qFrUovFMtksurKhQTv45yVUrOfQAC8x0AAui3IVY8DSpAuqVR7jsE",
 			"CAACAgIAAxkBAAERSaBqFrWCmOjc6nrqWKMTiZE0FpFXjwACup8AArLXgUgE5umHBy9ewzsE",
@@ -87,7 +87,8 @@ func startHandler(m *tg.NewMessage) error {
 		}
 		randomSticker := stickers[r.Intn(len(stickers))]
 		
-		_, _ = m.Client.SendSticker(m.ChannelID(), randomSticker)
+		// Gogram's SendMedia accepts the chat ID and the file ID string natively
+		_, _ = m.Client.SendMedia(m.ChannelID(), randomSticker, &tg.MediaOptions{})
 		time.Sleep(300 * time.Millisecond)
 
 		// 4. Send Main Menu Layout with Spoiler Image
