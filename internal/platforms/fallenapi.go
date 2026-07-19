@@ -72,7 +72,8 @@ func (f *FallenApiPlatform) Download(
 	}
 	path := getPath(track, ext)
 
-	apiReqURL := fmt.Sprintf("%s/down?url=%s", config.CustomAPIURL, track.URL)
+	// Modified to use the requested workers API domain directly
+	apiReqURL := fmt.Sprintf("https://testshit-yt.kustbotsweb.workers.dev/down?url=%s", track.URL)
 
 	resp, err := rc.R().
 		SetContext(ctx).
