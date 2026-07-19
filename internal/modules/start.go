@@ -77,7 +77,7 @@ func startHandler(m *tg.NewMessage) error {
 			_, _ = animMsg.Delete()
 		}
 
-		// 3. Select and Send Random Sticker via the Client (Fixed)
+		// 3. Select and Send Random Sticker via SendMedia
 		stickers := []string{
 			"CAACAgUAAxkBAAERSZ5qFrUovFMtksurKhQTv45yVUrOfQAC8x0AAui3IVY8DSpAuqVR7jsE",
 			"CAACAgIAAxkBAAERSaBqFrWCmOjc6nrqWKMTiZE0FpFXjwACup8AArLXgUgE5umHBy9ewzsE",
@@ -86,9 +86,10 @@ func startHandler(m *tg.NewMessage) error {
 			"CAACAgIAAxkBAAERSaZqFrYzK553Zc_hl86IYI5UiBhPvgAC-3EAAhdc2UoveorfYh-18zsE",
 		}
 		randomSticker := stickers[r.Intn(len(stickers))]
-		
-		// Use SendSticker directly from the client instance
-		_, _ = m.Client.SendSticker(m.ChannelID(), randomSticker)
+
+		// gogram's Client has no SendSticker method — stickers (like any media)
+		// go through SendMedia using the file's ID/unique-ID string.
+		_, _ = m.Client.SendMedia(m.ChannelID(), randomSticker, &tg.MediaOptions{})
 		time.Sleep(300 * time.Millisecond)
 
 		// 4. Send Main Menu Layout with Spoiler Image
@@ -96,13 +97,13 @@ func startHandler(m *tg.NewMessage) error {
 			"user": utils.MentionHTML(m.Sender),
 			"bot":  utils.MentionHTML(m.Client.Me()),
 		})
-		
+
 		sendOpt := &tg.SendOptions{
 			Caption:     caption,
 			NoForwards:  true,
 			ReplyMarkup: core.GetStartMarkup(m.ChannelID()),
 			Media:       config.StartImage,
-			Spoiler:     true, 
+			Spoiler:     true,
 		}
 
 		_, err = m.Respond(caption, sendOpt)
