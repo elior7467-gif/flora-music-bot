@@ -44,7 +44,7 @@ func startHandler(m *tg.NewMessage) error {
 	default:
 		r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
-		// 1. Trigger a Random Auto-Reaction (Matches Pyrogram implementation)
+		// 1. Trigger a Random Auto-Reaction
 		reactions := []string{"❤️", "🔥", "⚡", "😍", "🎉", "🥰", "✨", "🦋", "🌸", "💋", "💖"}
 		randomReaction := reactions[r.Intn(len(reactions))]
 		_ = m.React(randomReaction)
@@ -56,21 +56,14 @@ func startHandler(m *tg.NewMessage) error {
 			"❁ ℎ𝑖",
 			"❁ ℎ𝑖 ℎ",
 			"❁ ℎ𝑖 ℎ𝑜",
-			"❁ ℎ𝑖 ℎ5",
 			"❁ ℎ𝑖 ℎ𝑜𝑛",
-			"❁ ℎ𝑖 ℎ
 			"❁ ℎ𝑖 ℎ𝑜𝑛𝑒",
-			"❁ ℎ𝑖 ℎ𝑜𝑛𝑒𝑒",
-			"❁ ℎ𝑖 ℎ
-			"❁ ℎ𝑖 ℎ
-			"❁ ℎ𝑖 ℎ𝑜
-			"❁ ℎ𝑖 ℎ𝑜
+			"❁ ℎ𝑖 ℎ_𝑜𝑛𝑒𝑒",
 			"❁ ℎ𝑖 ℎ𝑜𝑛𝑒𝑒𝑒",
-			"❁ ℎ𝑖 ℎ𝑜𝑛𝑒𝑒𝑒𝑦",
-			"❁ ℎ𝑖 ℎ𝑜𝑛𝑒eeʏ ❁",
-			"✨ ℎ𝑖 ℎ𝑜𝑛𝑒eeʏ ✨",
-			"🌸 ℎ𝑖 ℎ
-			"🌸 ℎ𝑖 ℎ𝑜𝑛𝑒eeʏ 🌸",
+			"❁ ℎ𝑖 ℎ_𝑜𝑛𝑒𝑒𝑒𝑦",
+			"❁ ℎ𝑖 ℎ_i ℎ_𝑜𝑛𝑒eey ❁",
+			"✨ ℎ𝑖 ℎ_𝑜𝑛𝑒eey ✨",
+			"🌸 ℎ𝑖 ℎ_i ℎ_𝑜𝑛𝑒eey 🌸",
 		}
 
 		// Send initial typing frame
@@ -109,7 +102,7 @@ func startHandler(m *tg.NewMessage) error {
 			NoForwards:  true,
 			ReplyMarkup: core.GetStartMarkup(m.ChannelID()),
 			Media:       config.StartImage,
-			Spoiler:     true, // Native layout blurring mapping
+			Spoiler:     true, // Blurs the media as a spoiler
 		}
 
 		_, err = m.Respond(caption, sendOpt)
