@@ -111,7 +111,7 @@ Playback imediato de vídeo quando precisa mostrar algo urgente.`
 <b>/cplay [query]</b> — Toca no canal vinculado
 
 <b>⚙️ Setup necessário:</b>
-Primeiro usa <code>/channelplay --set [channel_id]</code>
+ Primeiro usa <code>/channelplay --set [channel_id]</code>
 
 <b>⚠️ Observação:</b>
 Todos os comandos c* funcionam igual aos comandos normais mas afetam o canal vinculado.`
@@ -329,11 +329,22 @@ func prepareRoomAndSearchMessage(
 		query = strings.TrimSpace(parts[1])
 	}
 
-	if query == "" && !m.IsReply() {
+	// Direct fix for MESSAGE_IDS_EMPTY: Explicitly validate the reply message payload map signature
+	if query == "" && (m.ReplyTo == nil || m.ReplyTo.ReplyToMsgId == 0) {
 		m.Reply(F(chatID, "no_song_query", locales.Arg{
 			"cmd": getCommand(m),
 		}))
 		return nil, nil, fmt.Errorf("no song query")
+	}
+
+	// Check if we can pull target details securely beforehand
+	if query == "" && (m.ReplyTo != nil && m.ReplyTo.ReplyToMsgId != 0) {
+		_, err := m.GetReplyTo()
+		if err != nil {
+			gologging.ErrorF("Failed verifying internal track parent reference target: %v", err)
+			m.Reply("❌ Cannot retrieve the target replied message context details.")
+			return nil, nil, err
+		}
 	}
 
 	// Searching messages
@@ -346,7 +357,8 @@ func prepareRoomAndSearchMessage(
 		searchStr = F(chatID, "searching")
 	}
 
-	replyMsg, err := m.Reply(searchStr)
+	// Using explicit SendOptions to guarantee clean context routing without empty arrays
+	replyMsg, err := m.Respond(searchStr, &tg.SendOptions{ParseMode: "HTML"})
 	if err != nil {
 		gologging.ErrorF("Failed to send searching message: %v", err)
 		return nil, nil, err
@@ -448,10 +460,7 @@ func filterAndTrimTracks(
 		filteredTracks = append(filteredTracks, track)
 	}
 
-	// Some tracks were skipped due to duration limit
 	if len(skippedTracks) > 0 {
-
-		// CASE 1: Only one track and it was skipped
 		if len(tracks) == 1 && len(filteredTracks) == 0 {
 			utils.EOR(
 				replyMsg,
@@ -463,9 +472,7 @@ func filterAndTrimTracks(
 			return nil, 0, fmt.Errorf("single long track skipped")
 		}
 
-		// CASE 2: Multiple tracks skipped
 		var b strings.Builder
-
 		b.WriteString(
 			F(chatID, "play_multiple_tracks_too_long_header", locales.Arg{
 				"count":      len(skippedTracks),
@@ -493,18 +500,13 @@ func filterAndTrimTracks(
 		time.Sleep(1 * time.Second)
 	}
 
-	// Keep only accepted tracks
 	tracks = filteredTracks
 
-	// CASE: everything was skipped
 	if len(tracks) == 0 {
 		utils.EOR(replyMsg, F(chatID, "play_all_tracks_skipped"))
 		return nil, 0, fmt.Errorf("all tracks skipped")
 	}
 
-	// Respect queue limit. A fila pode ter enchido entre a checagem inicial e o
-	// download (corrida de /play concorrente), deixando availableSlots negativo —
-	// sem o clamp, tracks[:availableSlots] daria panic de slice bounds.
 	availableSlots := config.QueueLimit - len(r.Queue())
 	if availableSlots < 0 {
 		availableSlots = 0
@@ -536,7 +538,6 @@ func playTracksAndRespond(
 		title := utils.EscapeHTML(utils.ShortTitle(track.Title, 25))
 		var filePath string
 
-		// Download first track if needed
 		if i == 0 && (!isActive || force) {
 			var opt *tg.SendOptions
 			if track.Duration > 420 {
@@ -579,7 +580,6 @@ func playTracksAndRespond(
 			gologging.InfoF("Downloaded track to %s", filePath)
 		}
 
-		// 🔁 play with retry
 		if err := playTrackWithRetry(r, track, filePath, force && i == 0, replyMsg); err != nil {
 			return err
 		}
@@ -588,7 +588,6 @@ func playTracksAndRespond(
 
 	mainTrack := tracks[0]
 
-	// ---------- Now Playing / Added to queue ----------
 	if !isActive || (force && len(tracks) > 0) {
 		title := utils.EscapeHTML(utils.ShortTitle(mainTrack.Title, 25))
 		btn := core.GetPlayMarkup(chatID, r, false)
@@ -686,7 +685,6 @@ func playTrackWithRetry(
 	replyMsg *tg.NewMessage,
 ) error {
 	for attempt := 1; attempt <= playMaxRetries; attempt++ {
-
 		if r.IsDestroyed() {
 			gologging.Info("Room destroyed during retry, aborting")
 			replyMsg.Delete()
@@ -705,8 +703,6 @@ func playTrackWithRetry(
 		}
 
 		switch {
-
-		// FloodWait
 		case tg.GetFloodWait(err) > 0:
 			wait := tg.GetFloodWait(err)
 			gologging.Error(
@@ -716,7 +712,6 @@ func playTrackWithRetry(
 			time.Sleep(time.Duration(wait) * time.Second)
 			continue
 
-		// Connection timeout
 		case errors.Is(err, ubot.ErrConnectionTimeout):
 			gologging.Error(
 				"Voice connection timeout. Stopping call session...",
@@ -728,7 +723,6 @@ func playTrackWithRetry(
 			core.DeleteRoom(r.ChatID())
 			return tg.ErrEndGroup
 
-		// RTMP unsupported
 		case strings.Contains(
 			err.Error(),
 			"Streaming is not supported when using RTMP",
@@ -740,7 +734,6 @@ func playTrackWithRetry(
 			core.DeleteRoom(r.ChatID())
 			return tg.ErrEndGroup
 
-		// No active voice chat
 		case strings.Contains(err.Error(), "group call") &&
 			strings.Contains(err.Error(), "is closed"):
 			utils.EOR(
@@ -749,14 +742,12 @@ func playTrackWithRetry(
 			)
 			return tg.ErrEndGroup
 
-		// GROUPCALL_INVALID
 		case tg.MatchError(err, "GROUPCALL_INVALID"):
 			gologging.Error("GROUPCALL_INVALID err occurred. Returning...")
 			core.DeleteRoom(r.ChatID())
 			utils.EOR(replyMsg, F(replyMsg.ChannelID(), "play_unable"))
 			return tg.ErrEndGroup
 
-		// INTERDC retry
 		case tg.MatchError(err, "INTERDC_X_CALL_ERROR"):
 			gologging.Error(
 				"INTERDC_X_CALL_ERROR occurred. Retrying... (attempt " +
@@ -766,7 +757,6 @@ func playTrackWithRetry(
 			continue
 		}
 
-		// Last attempt failed
 		if attempt == playMaxRetries {
 			gologging.Error(
 				"❌ Failed to play after " + utils.IntToStr(playMaxRetries) +
@@ -807,29 +797,24 @@ var errMessageMap = map[error]msgFn{
 	core.ErrAssistantJoinRateLimited: func(chatID int64, _ error) string {
 		return F(chatID, "err_assistant_join_rate_limited")
 	},
-
 	core.ErrAssistantJoinRequestSent: func(chatID int64, _ error) string {
 		return F(chatID, "err_assistant_join_request_sent")
 	},
-
 	core.ErrAssistantInviteLinkFetch: func(chatID int64, e error) string {
 		return F(chatID, "err_assistant_invite_link_fetch", locales.Arg{
 			"error": e.Error(),
 		})
 	},
-
 	core.ErrAssistantInviteFailed: func(chatID int64, e error) string {
 		return F(chatID, "err_assistant_invite_failed", locales.Arg{
 			"error": e.Error(),
 		})
 	},
-
 	core.ErrFetchFailed: func(chatID int64, e error) string {
 		return F(chatID, "err_fetch_failed", locales.Arg{
 			"error": e.Error(),
 		})
 	},
-
 	core.ErrPeerResolveFailed: func(chatID int64, _ error) string {
 		return F(chatID, "err_peer_resolve_failed")
 	},
@@ -839,21 +824,15 @@ func getErrorMessage(chatID int64, err error) string {
 	if err == nil {
 		return ""
 	}
-
 	for key, fn := range errMessageMap {
 		if errors.Is(err, key) {
 			return fn(chatID, err)
 		}
 	}
-
 	return F(chatID, "err_unknown", locales.Arg{
 		"error": err.Error(),
 	})
 }
-
-// Both safeDownload and safeGetTracks re-raise panic because all command
-// handlers are wrapped by SafeMessageHandler, which catches panics and sends
-// the debug trace to the logger and the owner.
 
 func safeGetTracks(
 	m, replyMsg *tg.NewMessage,
@@ -866,10 +845,6 @@ func safeGetTracks(
 			panic(r)
 		}
 	}()
-
-	// Não há ctx cancelável no escopo do play/search (o ctx de download só é
-	// criado mais tarde, por track). Usa Background; o timeout efetivo vem dos
-	// clients/yt-dlp internos.
 	tracks, err = platforms.GetTracks(context.Background(), m, video)
 	return tracks, err
 }
@@ -886,7 +861,6 @@ func safeDownload(
 			panic(r)
 		}
 	}()
-
 	path, err = platforms.Download(ctx, track, replyMsg)
 	return path, err
 }
